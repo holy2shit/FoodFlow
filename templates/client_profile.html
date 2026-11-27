@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль клиента - FoodFlow</title>
+    <style>
+        body { font-family: 'YS Text', 'Helvetica Neue', Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; }
+        .header { background-color: #1e1e1e; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .logo { font-size: 26px; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: -1px; }
+        .logo span { color: #ff9a3c; } /* РЫЖИЙ */
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .header-right a { color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; }
+        .header-right a:hover { color: #ff9a3c; }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 20px; }
+        .card { background: #1e1e1e; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); border: 1px solid #333; }
+        .card h2 { margin-top: 0; font-size: 24px; margin-bottom: 20px; text-align: center; color: #ff9a3c; } /* РЫЖИЙ */
+
+        .client-info { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
+        .client-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #333; background: #2a2a2a; margin-bottom: 10px; }
+        .client-name { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+        .client-phone { color: #aaa; font-size: 16px; margin-bottom: 5px; }
+        .client-email { color: #aaa; font-size: 14px; margin-bottom: 15px; }
+
+        .info-block { background: #2a2a2a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #444; }
+        .info-block strong { color: #ff9a3c; display: block; margin-bottom: 5px; font-size: 13px; text-transform: uppercase; } /* РЫЖИЙ */
+        .info-block span { font-size: 16px; }
+
+        .orders-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .orders-table th, .orders-table td { padding: 12px 15px; border-bottom: 1px solid #333; }
+        .orders-table th { color: #888; font-size: 14px; text-transform: uppercase; }
+        .orders-table td { color: #fff; }
+
+        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .status-new { background: #1a2c42; color: #42a5f5; }
+        .status-canceled { background: #3e1e1e; color: #ff6b6b; }
+
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #ff9a3c; text-decoration: none; font-weight: 500; } /* РЫЖИЙ */
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left"><a href="/" class="logo">FoodFlow<span>.</span></a></div>
+        <div class="header-right">
+            <a href="/admin">← Назад в админку</a>
+            <a href="/logout" style="color: #ff5252;">Выйти</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Профиль клиента</h2>
+
+            <div class="client-info">
+                {% if client[4] %}
+                    <img src="{{ url_for('static', filename='uploads/' + client[4]) }}" class="client-avatar">
+                {% else %}
+                    <div class="client-avatar" style="display:flex; justify-content:center; align-items:center; font-size:40px;">👤</div>
+                {% endif %}
+                <div class="client-name">{{ client[0] }}</div>
+            </div>
+
+            <div class="info-block">
+                <strong>Номер телефона</strong>
+                <span>{{ client[1] }}</span>
+            </div>
+
+            <div class="info-block">
+                <strong>Почта</strong>
+                <span>{{ client[2] if client[2] else 'Не указана' }}</span>
+            </div>
+
+            <div class="info-block">
+                <strong>Адрес доставки по умолчанию</strong>
+                <span>{{ client[3] if client[3] else 'Не указан' }}</span>
+            </div>
+
+            <h3 style="margin-top: 40px; margin-bottom: 15px; color: #fff;">История заказов клиента:</h3>
+
+            {% if orders %}
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Блюдо</th>
+                        <th>Сумма</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><a href="/order/{{ order[0] }}" style="color: #ff9a3c; text-decoration: none; font-weight: bold;">№{{ order[0] }}</a></td> <!-- РЫЖИЙ -->
+                        <td>{{ order[1] }}</td>
+                        <td><b style="color: #ff9a3c;">{{ order[2] | round | int }} ₽</b></td> <!-- РЫЖИЙ -->
+                        <td>{{ order[3] }}</td>
+                        <td>
+                            {% if order[4] == 'Новый' %}
+                                <span class="status-badge status-new">{{ order[4] }}</span>
+                            {% else %}
+                                <span class="status-badge status-canceled">{{ order[4] }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div style="text-align: center; color: #888; padding: 20px;">У этого клиента пока нет заказов.</div>
+            {% endif %}
+        </div>
+        <a href="/admin" class="back-link">← Вернуться в админку</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация - FoodFlow</title>
+    <style>
+        body { font-family: 'YS Text', 'Helvetica Neue', Arial, sans-serif; background-color: #121212; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #fff; }
+        .login-box { background: #1e1e1e; padding: 50px 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); width: 100%; max-width: 400px; border: 1px solid #333; }
+        h2 { margin: 0 0 30px 0; font-size: 28px; text-align: center; }
+        .error-msg { background: #3e1e1e; color: #ff6b6b; padding: 12px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-size: 14px; border: 1px solid #5a2a2a; }
+        .input-group { position: relative; margin-bottom: 15px; }
+        input { width: 100%; padding: 16px; padding-right: 45px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: #fff; font-size: 16px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #ff9a3c; }
+        .eye-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+        .eye-btn svg { width: 20px; height: 20px; stroke: #999; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: 0.2s; }
+        .eye-btn:hover svg { stroke: #fff; }
+        button[type="submit"] { width: 100%; padding: 16px; background: #ff9a3c; color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        button[type="submit"]:hover { background: #e68a2e; }
+        .link { text-align: center; margin-top: 20px; font-size: 15px; color: #aaa; }
+        .link a { color: #ff9a3c; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Регистрация</h2>
+        {% if error %}
+            <div class="error-msg">{{ error }}</div>
+        {% endif %}
+        <form method="POST">
+            <div class="input-group">
+                <input type="text" name="phone" placeholder="Номер телефона" required>
+            </div>
+            <div class="input-group">
+                <input type="text" name="email" placeholder="Почта" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" id="passwordInput" placeholder="Пароль" required>
+                <button type="button" class="eye-btn" id="togglePassword" title="Показать пароль">
+                    <svg id="eyeIcon" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            </div>
+            <button type="submit">Создать аккаунт</button>
+        </form>
+        <div class="link">
+            Уже есть аккаунт? <a href="/login">Войти</a>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('passwordInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        toggleBtn.addEventListener('click', function () {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+                toggleBtn.title = 'Скрыть пароль';
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+                toggleBtn.title = 'Показать пароль';
+            }
+        });
+    </script>
+</body>
+</html>

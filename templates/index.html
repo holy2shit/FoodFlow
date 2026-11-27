@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>FoodFlow - Доставка еды</title>
+    <style>
+        body { font-family: 'YS Text', 'Helvetica Neue', Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; }
+        .header { background-color: #1e1e1e; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; }
+        .header-left { display: flex; align-items: center; gap: 15px; flex: 1; min-width: 150px; }
+        .logo { font-size: 26px; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: -1px; }
+        .logo span { color: #ff9a3c; }
+        .search-container { flex: 1; max-width: 700px; display: flex; align-items: center; background: #2a2a2a; border-radius: 12px; padding: 0 15px; height: 48px; margin: 0 20px; }
+        .search-icon { display: flex; align-items: center; justify-content: center; margin-right: 10px; color: #999; }
+        .search-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .search-input { flex-grow: 1; border: none; background: transparent; font-size: 16px; outline: none; color: #ffffff; }
+        .search-input::placeholder { color: #777; }
+        .header-right { display: flex; align-items: center; gap: 15px; justify-content: flex-end; flex: 1; min-width: 150px; }
+        .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #ffffff; padding: 5px; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+
+        .shops-section { display: flex; flex-direction: column; align-items: center; margin: 40px 0 20px 0; }
+        .shops-title { font-size: 28px; font-weight: 800; margin-bottom: 25px; color: #ffffff; }
+        .shops-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; max-width: 1300px; padding: 0 20px; }
+
+        .shop-card { background: #1e1e1e; border-radius: 16px; border: 1px solid #333; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; text-decoration: none; color: white; width: 260px; overflow: hidden; }
+        .shop-card:hover { transform: translateY(-4px); border-color: #ff9a3c; }
+        .shop-card.active { border-color: #ff9a3c; box-shadow: 0 0 15px rgba(255, 154, 60, 0.2); }
+
+        .shop-img-wrapper { width: 100%; height: 200px; background: #2a2a2a; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .shop-logo { width: 100%; height: 100%; object-fit: cover; }
+
+        .shop-card-all { background: #2a2a2a; border: 1px solid #333; display: flex; justify-content: center; align-items: center; height: 100%; min-height: 280px; }
+        .shop-card-all:hover { border-color: #ff9a3c; background: #333; }
+        .all-text { font-size: 32px; font-weight: 800; color: #ffffff; text-align: center; padding: 20px; }
+
+        .shop-info { padding: 20px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .shop-name { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+        .shop-time { font-size: 14px; color: #888; }
+
+        .categories-wrapper { background: #1e1e1e; padding: 0 40px; display: flex; justify-content: center; border-bottom: 1px solid #333; margin-top: 20px; }
+        .categories-bar { display: flex; gap: 30px; overflow-x: auto; scrollbar-width: none; padding: 15px 0; }
+        .categories-bar::-webkit-scrollbar { display: none; }
+        .cat-link { color: #aaa; text-decoration: none; font-size: 15px; font-weight: 500; white-space: nowrap; padding-bottom: 15px; margin-bottom: -15px; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .cat-link:hover { color: #fff; }
+        .cat-link.active { color: #ffffff; border-bottom-color: #ff9a3c; font-weight: 700; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 10px 20px 30px 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 24px; }
+
+        .card { background: transparent; border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-4px); }
+        .card-img-wrapper { position: relative; width: 100%; height: 280px; border-radius: 20px; overflow: hidden; background: #2a2a2a; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; border-radius: 20px; }
+        .card-content { padding: 12px 0; flex-grow: 1; display: flex; flex-direction: column; }
+        .card-rest { color: #ff9a3c; font-size: 12px; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-title { font-size: 18px; font-weight: 700; margin: 0 0 4px 0; color: #ffffff; }
+        .card-price { font-size: 18px; font-weight: bold; color: #ff9a3c; margin-bottom: 5px; }
+        .card-rating { font-size: 14px; font-weight: 600; color: #ffffff; margin-right: 5px; }
+        .card-rating span { color: #888; font-weight: 400; }
+        .card-info { display: flex; align-items: center; font-size: 14px; color: #aaa; margin-bottom: 8px; }
+        .card-info .dot { margin: 0 5px; color: #555; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #1e1e1e; padding: 40px; border-radius: 20px; width: 100%; max-width: 360px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); position: relative; border: 1px solid #333; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #999; background: none; border: none; }
+        .modal-content h2 { margin: 0 0 20px 0; font-size: 24px; text-align: center; color: #fff; }
+        .modal-content input { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: #fff; box-sizing: border-box; outline: none; font-size: 15px; }
+        .modal-content input:focus { border-color: #ff9a3c; }
+        .modal-content button[type="submit"] { width: 100%; padding: 14px; background: #ff9a3c; color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; }
+        .eye-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+        .eye-btn svg { width: 20px; height: 20px; stroke: #999; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: 0.2s; }
+        .eye-btn:hover svg { stroke: #fff; }
+
+        .dish-modal-content { background: #1e1e1e; padding: 0; border-radius: 20px; width: 100%; max-width: 800px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); position: relative; border: 1px solid #333; display: flex; overflow: hidden; }
+        .dish-modal-img { width: 50%; background: #2a2a2a; }
+        .dish-modal-img img { width: 100%; height: 100%; object-fit: cover; }
+        .dish-modal-info { width: 50%; padding: 40px; display: flex; flex-direction: column; }
+        .dish-modal-info h2 { margin: 0 0 10px 0; text-align: left; }
+        .dish-modal-desc { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+        .kbju { display: flex; gap: 10px; background: #2a2a2a; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .kbju div { flex: 1; }
+        .kbju span { display: block; font-size: 18px; font-weight: bold; color: #ff9a3c; }
+        .kbju small { color: #888; font-size: 11px; text-transform: uppercase; }
+        .dish-modal-info select { width: 100%; padding: 12px; font-size: 16px; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 8px; outline: none; margin-bottom: 15px; }
+        .dish-modal-info .price { font-size: 28px; font-weight: bold; color: #ff9a3c; margin-bottom: 20px; }
+        .dish-modal-info .qty { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .dish-modal-info .qty input { width: 60px; padding: 10px; font-size: 18px; text-align: center; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 8px; }
+        .dish-modal-info .buy-btn { width: 100%; padding: 15px; background-color: #ff9a3c; color: black; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        .dish-modal-info .buy-btn:hover { background-color: #e68a2e; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left"><a href="/" class="logo">FoodFlow<span>.</span></a></div>
+        <div class="search-container">
+            <div class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
+            <form action="/" method="GET" style="display:flex; flex-grow: 1; margin:0;">
+                <input type="hidden" name="restaurant" value="{{ current_restaurant }}">
+                <input type="text" name="search" class="search-input" placeholder="Искать в FoodFlow" value="{{ search_query }}">
+            </form>
+        </div>
+        <div class="header-right">
+            <a href="/cart" style="color: #ffd700; text-decoration: none; font-size: 24px; position: relative; display: flex; align-items: center; margin-right: 15px;">
+                🛒
+                {% if session.get('cart') %}
+                    <span style="position: absolute; top: -5px; right: -10px; background: #ff5252; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px;">
+                        {{ session['cart']|length }}
+                    </span>
+                {% endif %}
+            </a>
+            {% if user.user_id %}
+                <a href="/profile?tab=orders" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 15px; margin-right: 10px;">Мои заказы</a>
+                <a href="/profile" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                    {% if user.avatar %}<img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="avatar">{% endif %}
+                    <span style="font-weight: 600; font-size: 15px; color: #ffffff;">{{ user.nickname }}</span>
+                </a>
+            {% else %}
+                <button class="icon-btn" onclick="document.getElementById('loginModal').style.display='flex'">👤</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- БЛОК МАГАЗИНОВ -->
+    <div class="shops-section">
+        <div class="shops-title">Магазины</div>
+        <div class="shops-container">
+            <a href="/?restaurant=Все&category=Все" class="shop-card shop-card-all {% if current_restaurant == 'Все' %}active{% endif %}" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                <div class="all-text">Все<br>товары</div>
+            </a>
+            <a href="/?restaurant=Додо Пицца&category=Все" class="shop-card {% if current_restaurant == 'Додо Пицца' %}active{% endif %}">
+                <div class="shop-img-wrapper">
+                    <img src="{{ url_for('static', filename='Image/DodoPizza.jpg') }}" class="shop-logo" onerror="this.style.display='none'">
+                </div>
+                <div class="shop-info">
+                    <div class="shop-name">Додо Пицца</div>
+                    <div class="shop-time">30–50 мин</div>
+                </div>
+            </a>
+            <a href="/?restaurant=Rostics&category=Все" class="shop-card {% if current_restaurant == 'Rostics' %}active{% endif %}">
+                <div class="shop-img-wrapper">
+                    <img src="{{ url_for('static', filename='Image/rostics.png') }}" class="shop-logo" onerror="this.style.display='none'">
+                </div>
+                <div class="shop-info">
+                    <div class="shop-name">Rostics</div>
+                    <div class="shop-time">20–40 мин</div>
+                </div>
+            </a>
+            <a href="/?restaurant=Супер суши&category=Все" class="shop-card {% if current_restaurant == 'Супер суши' %}active{% endif %}">
+                <div class="shop-img-wrapper">
+                    <img src="{{ url_for('static', filename='Image/supersushi.png') }}" class="shop-logo" onerror="this.style.display='none'">
+                </div>
+                <div class="shop-info">
+                    <div class="shop-name">Супер суши</div>
+                    <div class="shop-time">40–60 мин</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- КАТЕГОРИИ -->
+    <div class="categories-wrapper">
+        <div class="categories-bar">
+            <a href="/?category=Все&restaurant={{ current_restaurant }}" class="cat-link {% if current_category == 'Все' %}active{% endif %}">Все</a>
+            {% for cat in categories %}
+                <a href="/?category={{ cat }}&restaurant={{ current_restaurant }}" class="cat-link {% if current_category == cat %}active{% endif %}">{{ cat }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            {% for dish in dishes %}
+            <div onclick="openDishModal({{ dish[0] }})" class="card">
+                <div class="card-img-wrapper">
+                    <img src="{{ url_for('static', filename='Image/' + dish[4]) }}" class="card-img" alt="{{ dish[1] }}" onerror="this.style.display='none'">
+                </div>
+                <div class="card-content">
+                    <div class="card-rest">{{ dish[5] }}</div>
+                    <h3 class="card-title">{{ dish[1] }}</h3>
+                    <!-- ЦЕНА НА ГЛАВНОЙ -->
+                    <div class="card-price">{{ dish[2] | round | int }} ₽</div>
+                    <div class="card-info">
+                        <span class="card-rating">★ 0.0 <span>(0)</span></span>
+                        <span class="dot">•</span>
+                        <span>
+                            {% if dish[5] == 'Rostics' %}20–40 мин
+                            {% elif dish[5] == 'Супер суши' %}40–60 мин
+                            {% else %}30–50 мин{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ТОВАРА -->
+    <div class="modal-overlay" id="dishModal" onclick="if(event.target===this) this.style.display='none'">
+        <div class="dish-modal-content">
+            <button class="close-btn" onclick="document.getElementById('dishModal').style.display='none'">×</button>
+            <div class="dish-modal-img">
+                <img id="modalDishImage" src="" alt="">
+            </div>
+            <div class="dish-modal-info">
+                <div id="modalDishCategory" style="color: #888; text-transform: uppercase; font-size: 12px; letter-spacing: 1px;"></div>
+                <div id="modalDishRestaurant" style="color: #ff9a3c; font-size: 14px; font-weight: bold; margin-bottom: 10px;"></div>
+                <h2 id="modalDishName"></h2>
+                <p class="dish-modal-desc" id="modalDishDesc"></p>
+
+                <div class="kbju">
+                    <div><span id="modalDishCalories">0</span><small>Ккал</small></div>
+                    <div><span id="modalDishProteins">0</span><small>Белки</small></div>
+                    <div><span id="modalDishFats">0</span><small>Жиры</small></div>
+                    <div><span id="modalDishCarbs">0</span><small>Углеводы</small></div>
+                </div>
+
+                <form action="/order/submit" method="POST" id="modalOrderForm">
+                    <input type="hidden" name="dish_id" id="modalDishId" value="">
+                    <div id="modalSizesContainer"></div>
+                    <div class="qty">
+                        <label style="color:#aaa;">Количество:</label>
+                        <input type="number" name="quantity" value="1" min="1" max="10">
+                    </div>
+                    <button type="submit" class="buy-btn">Добавить в заказ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ВХОДА -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="document.getElementById('loginModal').style.display='none'">×</button>
+            <h2>Вход в FoodFlow</h2>
+            <form method="POST" action="/login">
+                <input type="text" name="login_input" placeholder="Телефон или Почта" required>
+                <div style="position: relative; margin-bottom: 12px;">
+                    <input type="password" name="password" id="modalPasswordInput" placeholder="Пароль" required style="margin-bottom: 0;">
+                    <button type="button" class="eye-btn" id="modalTogglePassword" title="Показать пароль"><svg id="modalEyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                </div>
+                <button type="submit">Войти</button>
+            </form>
+            <div style="text-align: center; margin-top: 15px; font-size: 14px; color: #aaa;">Нет аккаунта? <a href="/register" style="color: #ff9a3c; text-decoration: none;">Зарегистрироваться</a></div>
+        </div>
+    </div>
+
+    <script>
+        const modalToggleBtn = document.getElementById('modalTogglePassword');
+        const modalPasswordInput = document.getElementById('modalPasswordInput');
+        const modalEyeIcon = document.getElementById('modalEyeIcon');
+        if (modalToggleBtn) {
+            modalToggleBtn.addEventListener('click', function () {
+                if (modalPasswordInput.type === 'password') {
+                    modalPasswordInput.type = 'text';
+                    modalEyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+                    modalToggleBtn.title = 'Скрыть пароль';
+                } else {
+                    modalPasswordInput.type = 'password';
+                    modalEyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+                    modalToggleBtn.title = 'Показать пароль';
+                }
+            });
+        }
+
+        function openDishModal(dishId) {
+            fetch('/api/dish/' + dishId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('modalDishId').value = data.id;
+                    document.getElementById('modalDishName').innerText = data.name;
+                    document.getElementById('modalDishDesc').innerText = data.description;
+                    document.getElementById('modalDishCategory').innerText = data.category;
+                    // УБРАЛИ ЭМОДЗИ ЛОКАЦИИ
+                    document.getElementById('modalDishRestaurant').innerText = data.restaurant || 'Ресторан';
+                    document.getElementById('modalDishCalories').innerText = data.calories;
+                    document.getElementById('modalDishProteins').innerText = data.proteins;
+                    document.getElementById('modalDishFats').innerText = data.fats;
+                    document.getElementById('modalDishCarbs').innerText = data.carbs;
+                    document.getElementById('modalDishImage').src = '/static/Image/' + data.image;
+
+                    const sizesContainer = document.getElementById('modalSizesContainer');
+                    if (data.sizes.length > 0) {
+                        let selectHtml = '<label style="display:block; margin-bottom:8px; color:#aaa;">Выберите размер:</label><select name="size_id" required>';
+                        data.sizes.forEach(size => {
+                            selectHtml += `<option value="${size.id}">${size.name} — ${size.price} ₽</option>`;
+                        });
+                        selectHtml += '</select>';
+                        sizesContainer.innerHTML = selectHtml;
+                    } else {
+                        sizesContainer.innerHTML = `
+                            <input type="hidden" name="size_id" value="none">
+                            <div style="margin-bottom:20px;">
+                                <span style="color:#ff9a3c; font-size:24px; font-weight:bold;">${data.price} ₽</span>
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('dishModal').style.display = 'flex';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Корзина - FoodFlow</title>
+    <style>
+        body { font-family: 'YS Text', 'Helvetica Neue', Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; }
+        .header { background-color: #1e1e1e; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
+        .logo { font-size: 26px; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: -1px; }
+        .logo span { color: #ff9a3c; }
+        .header-right a { color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; margin-left: 20px; }
+        .container { max-width: 900px; margin: 40px auto; padding: 20px; }
+        .cart-card { background: #1e1e1e; border-radius: 20px; border: 1px solid #333; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        h1 { color: #ff9a3c; margin-top: 0; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #333; }
+        .cart-item:last-child { border-bottom: none; }
+        .item-info h3 { margin: 0 0 5px 0; font-size: 18px; }
+        .item-info p { margin: 0; color: #aaa; font-size: 14px; }
+        .item-controls { display: flex; align-items: center; gap: 15px; }
+        .item-price { font-size: 20px; font-weight: bold; color: #ffd700; min-width: 100px; text-align: right; }
+        .remove-btn { background: #3e1e1e; color: #ff6b6b; border: 1px solid #5a2a2a; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.2s; }
+        .remove-btn:hover { background: #5a2a2a; color: #fff; }
+        .qty-form { display: flex; align-items: center; gap: 5px; }
+        .qty-input { width: 50px; padding: 8px; text-align: center; background: #2a2a2a; color: white; border: 1px solid #444; border-radius: 6px; outline: none; }
+        .update-btn { background: #333; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .update-btn:hover { background: #444; }
+        .cart-total { display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #333; }
+        .cart-total h2 { margin: 0; font-size: 24px; }
+        .checkout-btn { background: #ff9a3c; color: #000; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .checkout-btn:hover { background: #e68a2e; }
+        .empty-cart { text-align: center; color: #888; font-size: 18px; padding: 40px 0; }
+        .back-link { display: inline-block; margin-top: 20px; color: #ff9a3c; text-decoration: none; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #1e1e1e; padding: 40px; border-radius: 20px; width: 100%; max-width: 360px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); position: relative; border: 1px solid #333; }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #999; background: none; border: none; }
+        .modal-content h2 { margin: 0 0 20px 0; font-size: 24px; text-align: center; color: #fff; }
+        .modal-content input { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; border: 1px solid #444; background: #2a2a2a; color: #fff; box-sizing: border-box; outline: none; font-size: 15px; }
+        .modal-content input:focus { border-color: #ff9a3c; }
+        .modal-content button[type="submit"] { width: 100%; padding: 14px; background: #ff9a3c; color: #000; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="logo">FoodFlow<span>.</span></a>
+        <div class="header-right">
+            <a href="/">В меню</a>
+            <a href="/logout" style="color: #ff5252;">Выйти</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="cart-card">
+            <h1>🛒 Ваша корзина</h1>
+            {% if cart %}
+                {% for item in cart %}
+                <div class="cart-item">
+                    <div class="item-info">
+                        <h3>{{ item.name }}</h3>
+                        <p>Размер: {{ item.size_name }}</p>
+                    </div>
+
+                    <div class="item-controls">
+                        <form action="/cart/update/{{ loop.index0 }}" method="POST" class="qty-form">
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99" class="qty-input">
+                            <button type="submit" class="update-btn" title="Обновить количество">↻</button>
+                        </form>
+
+                        <div class="item-price">{{ (item.price | float * item.quantity) | round | int }} ₽</div>
+
+                        <a href="/cart/remove/{{ loop.index0 }}" class="remove-btn">Удалить</a>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="cart-total">
+                    <h2>Итого: <span style="color: #ffd700;">{{ total | round | int }} ₽</span></h2>
+                    <button class="checkout-btn" onclick="document.getElementById('checkoutModal').style.display='flex'">Оформить заказ</button>
+                </div>
+            {% else %}
+                <div class="empty-cart">Ваша корзина пока пуста 😔</div>
+            {% endif %}
+            <a href="/" class="back-link">← Вернуться на главную</a>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ОФОРМЛЕНИЯ -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="document.getElementById('checkoutModal').style.display='none'">×</button>
+            <h2>Куда доставить?</h2>
+            <form action="/checkout" method="POST">
+                <input type="text" name="address" placeholder="Улица, дом, квартира" value="{{ current_address }}" required>
+                <button type="submit">Подтвердить заказ</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

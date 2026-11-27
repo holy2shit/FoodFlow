@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ-панель - FoodFlow</title>
+    <style>
+        body { font-family: 'YS Text', 'Helvetica Neue', Arial, sans-serif; background-color: #121212; color: #ffffff; margin: 0; padding: 0; }
+        .header { background-color: #1e1e1e; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.3); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #333; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .logo { font-size: 26px; font-weight: 900; color: #ffffff; text-decoration: none; letter-spacing: -1px; }
+        .logo span { color: #ff9a3c; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .header-right a { color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; }
+        .header-right a:hover { color: #ff9a3c; }
+        .container { max-width: 1400px; margin: 40px auto; padding: 20px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .admin-header h1 { margin: 0; font-size: 28px; color: #ff9a3c; }
+        .table-card { background: #1e1e1e; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid #333; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 16px 20px; border-bottom: 1px solid #333; }
+        th { background-color: #2a2a2a; font-weight: 600; color: #aaa; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #252525; }
+        .status-badge { padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+        .status-new { background: #1a2c42; color: #42a5f5; }
+        .status-canceled { background: #3e1e1e; color: #ff6b6b; }
+        .cancel-btn { background: #3e1e1e; color: #ff6b6b; border: 1px solid #5a2a2a; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; transition: 0.2s; font-size: 14px; display: inline-block; }
+        .cancel-btn:hover { background: #5a2a2a; color: #fff; }
+        .empty-text { text-align: center; color: #888; padding: 40px; }
+
+        .client-link { color: #fff; text-decoration: none; border-bottom: 1px dashed #555; transition: 0.2s; }
+        .client-link:hover { color: #ff9a3c; border-bottom-color: #ff9a3c; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="/" class="logo">FoodFlow<span>.</span></a>
+        </div>
+        <div class="header-right">
+            <a href="/">На главную</a>
+            <a href="/logout" style="color: #ff5252;">Выйти</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="admin-header">
+            <h1>Панель администратора</h1>
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Клиент</th>
+                        <th>Телефон</th>
+                        <th>Адрес</th>
+                        <th>Блюдо</th>
+                        <th>Сумма</th>
+                        <th>Дата</th>
+                        <th>Статус</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for o in orders %}
+                    <tr>
+                        <td><a href="/order/{{ o[0] }}" style="color: #ff9a3c; text-decoration: none; font-weight: bold;">№{{ o[0] }}</a></td>
+                        <td>
+                            <!-- ТЕПЕРЬ ПРОСТО КЛИКАБЕЛЬНЫЙ НИК БЕЗ ИКОНКИ -->
+                            <a href="/admin/client/{{ o[8] }}" class="client-link">{{ o[1] }}</a>
+                        </td>
+                        <td>{{ o[2] }}</td>
+                        <td>{{ o[7] }}</td>
+                        <td>{{ o[3] }}</td>
+                        <td><b style="color: #ff9a3c;">{{ o[4] | round | int }} ₽</b></td>
+                        <td>{{ o[5] }}</td>
+                        <td>
+                            {% if o[6] == 'Новый' %}
+                                <span class="status-badge status-new">{{ o[6] }}</span>
+                            {% else %}
+                                <span class="status-badge status-canceled">{{ o[6] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if o[6] != 'Отменен' %}
+                                <a href="/admin/cancel/{{ o[0] }}" class="cancel-btn">Отменить</a>
+                            {% else %}
+                                <span style="color: #555;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="empty-text">Заказов пока нет</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
